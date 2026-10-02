@@ -2,177 +2,174 @@
 <html lang="pt-PT">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta name="theme-color" content="#0e0c0a" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Administração · Gala 50 Anos</title>
-  <meta name="robots" content="noindex" />
-  <meta name="description" content="As fotografias da Gala dos 50 anos da Escola Professor Reynaldo dos Santos, partilhadas por todos." />
   <link rel="icon" href="favicon.svg" type="image/svg+xml" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css" />
+  <style>
+    .admin-header { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: 2rem; }
+    .status-badge { display: inline-flex; align-items: center; gap: .5rem; font-size: .85rem; padding: .3rem .8rem; border-radius: 999px; background: rgba(59, 130, 246, 0.15); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.3); }
+    .grid-admin { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1.25rem; margin-top: 1.5rem; }
+    .card-admin { background: var(--ink-2); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; }
+    .card-admin img { width: 100%; aspect-ratio: 4/3; object-fit: cover; background: #000; }
+    .card-body { padding: .8rem 1rem; flex: 1; display: flex; flex-direction: column; justify-content: space-between; gap: .8rem; }
+    .card-meta { font-size: .85rem; color: var(--muted); }
+    .card-meta strong { color: var(--cream); display: block; font-weight: 600; }
+    .card-actions { display: flex; gap: .5rem; }
+    .card-actions button { flex: 1; padding: .45rem; font-size: .85rem; border-radius: 6px; font-weight: 600; cursor: pointer; border: none; }
+    .btn-approve { background: #2563eb; color: #fff; }
+    .btn-approve:hover { background: #1d4ed8; }
+    .btn-delete { background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3) !important; }
+    .btn-delete:hover { background: rgba(239, 68, 68, 0.3); }
+    .login-box { max-width: 380px; margin: 4rem auto; padding: 2rem; background: var(--ink-2); border: 1px solid var(--line); border-radius: 16px; text-align: center; }
+  </style>
 </head>
 <body>
   <header class="site-header">
     <a class="brand" href="index.html">
-      <span class="brand-mark gold-text">50</span>
-      <span class="brand-name"><strong>Gala 50 Anos</strong>Escola Prof. Reynaldo dos Santos</span>
+      <span class="brand-mark gold-text" style="color:#60a5fa">50</span>
+      <span class="brand-name"><strong>Gala 50 Anos</strong>Painel de Moderação</span>
     </a>
     <nav class="nav">
-      <a href="index.html">Galeria</a>
-      <a href="enviar.html">Enviar fotos</a>
-      <a href="apresentacao.html">Apresentação</a>
+      <a href="index.html">Ver Galeria</a>
+      <button id="logoutBtn" class="btn ghost small hidden" onclick="logout()">Sair</button>
     </nav>
   </header>
 
-  <style>
-    .admin { max-width: 1280px; margin: 0 auto; padding: 2.5rem clamp(1rem, 4vw, 3rem) 4rem; }
-    .admin-top { display: flex; justify-content: space-between; align-items: end; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.5rem; }
-    .admin-top h1 { font-family: var(--serif); font-weight: 500; font-size: 2.6rem; margin: 0; }
-    .toolbar { display: flex; gap: .6rem; flex-wrap: wrap; align-items: center; }
-    .tabs { display: flex; gap: .3rem; background: var(--ink-2); border: 1px solid var(--line); border-radius: 999px; padding: .3rem; }
-    .tabs button { border: 0; background: transparent; color: var(--muted); padding: .45rem 1rem; border-radius: 999px; cursor: pointer; }
-    .tabs button.active { background: var(--ink-3); color: var(--cream); }
-    .tabs .n { display: inline-block; min-width: 1.4rem; margin-left: .3rem; font-size: .75rem; padding: .05rem .4rem; border-radius: 999px; background: rgba(59, 130, 246, 0.18); color: #60a5fa; }
-    .switch { display: flex; align-items: center; gap: .7rem; background: var(--ink-2); border: 1px solid var(--line); border-radius: var(--radius); padding: .9rem 1.1rem; margin-bottom: 1.5rem; }
-    .switch input { width: 2.6rem; height: 1.5rem; accent-color: #2563eb; }
-    .switch p { margin: 0; font-size: .9rem; color: var(--muted); }
-    .switch p strong { color: var(--cream); display: block; }
-    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 14px; }
-    .card { background: var(--ink-2); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; }
-    .card a { display: block; aspect-ratio: 4/3; background: var(--ink-3); }
-    .card img { width: 100%; height: 100%; object-fit: cover; }
-    .card .meta { padding: .6rem .8rem 0; font-size: .82rem; color: var(--muted); }
-    .card .meta strong { color: var(--cream); font-weight: 600; }
-    .card .actions { display: flex; gap: .4rem; padding: .7rem .8rem .8rem; flex-wrap: wrap; }
-    .login { max-width: 420px; margin: 4rem auto; }
-  </style>
-
-  <main>
-    <section class="page login hidden" id="loginView">
-      <p class="eyebrow">Área reservada</p>
-      <h1>Validação de <span class="gold-text">fotografias</span></h1>
-      <form class="panel" id="loginForm">
-        <div class="field"><label for="user">Utilizador</label><input class="input" id="user" autocomplete="username" required /></div>
-        <div class="field"><label for="password">Palavra-passe</label><input class="input" id="password" type="password" autocomplete="current-password" required /></div>
-        <button class="btn" style="width:100%">Entrar</button>
-        <div class="notice error hidden" id="loginError"></div>
-      </form>
-    </section>
-
-    <section class="admin hidden" id="adminView">
-      <div class="admin-top">
-        <div><p class="eyebrow" style="margin:0 0 .3rem">Administração</p><h1>Fotografias</h1></div>
-        <div class="toolbar">
-          <div class="tabs" id="tabs">
-            <button data-tab="pending">Por validar<span class="n" id="n-pending">0</span></button>
-            <button data-tab="approved" class="active">Publicadas<span class="n" id="n-approved">0</span></button>
-            <button data-tab="hidden">Ocultas<span class="n" id="n-hidden">0</span></button>
-          </div>
-          <button class="btn ghost small" id="logout">Sair</button>
+  <main class="page">
+    <!-- Formulário de Login -->
+    <div id="loginSection" class="login-box">
+      <h2 style="font-family:var(--serif); font-size: 2rem; margin-bottom: .5rem;">Acesso Restrito</h2>
+      <p style="color:var(--muted); font-size: .9rem; margin-bottom: 1.5rem;">Introduza a palavra-passe de moderação.</p>
+      
+      <form onsubmit="handleLogin(event)">
+        <div class="field" style="margin-bottom: 1rem;">
+          <input type="password" id="password" class="input" placeholder="Palavra-passe" required style="text-align: center;" />
         </div>
+        <button type="submit" class="btn" style="width: 100%; background: #2563eb; color: #fff;">Entrar</button>
+      </form>
+      <p id="loginError" style="color: #f87171; font-size: .85rem; margin-top: 1rem;" class="hidden">Palavra-passe incorreta.</p>
+    </div>
+
+    <!-- Conteúdo do Painel -->
+    <div id="adminContent" class="hidden">
+      <div class="admin-header">
+        <div>
+          <h1>Moderação de <span style="color:#60a5fa">Fotografias</span></h1>
+          <p class="lead" style="margin:0">Valide ou remova as fotografias enviadas pelos convidados.</p>
+        </div>
+        <span class="status-badge">● Modo de Demonstração</span>
       </div>
 
-      <label class="switch">
-        <input type="checkbox" id="moderation" />
-        <p><strong>Validar antes de publicar</strong>Desligado: as fotografias aparecem de imediato e pode ocultá-las depois. Ligado: só aparecem depois de aprovadas aqui.</p>
-      </label>
+      <div id="emptyNotice" class="notice hidden" style="text-align: center; padding: 3rem;">
+        Não existem fotografias pendentes de moderação.
+      </div>
 
-      <div class="grid" id="grid"></div>
-      <div class="empty hidden" id="emptyAdmin"><h3>Nada por aqui</h3><p>Não há fotografias neste separador.</p></div>
-    </section>
+      <div class="grid-admin" id="photosGrid"></div>
+    </div>
   </main>
+
+  <footer class="footer">Gala dos 50 Anos · Moderação de Conteúdos</footer>
 
   <script src="common.js"></script>
   <script>
-    const loginView = document.getElementById("loginView");
-    const adminView = document.getElementById("adminView");
-    const grid = document.getElementById("grid");
-    const emptyAdmin = document.getElementById("emptyAdmin");
-    const moderation = document.getElementById("moderation");
-    let photos = [];
-    let tab = "approved";
+    // Palavra-passe de demonstração para o GitHub Pages
+    const ADMIN_PASSWORD = "gala50";
 
-    async function api(action, body) {
-      const res = await fetch(`/api/admin/${action}`, body ? { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) } : { cache: "no-store" });
-      const data = await res.json().catch(() => ({}));
-      if (res.status === 401 && action !== "login") { showLogin(); throw new Error(data.error); }
-      if (!res.ok) throw new Error(data.error || "Erro inesperado");
-      return data;
+    const loginSection = document.getElementById("loginSection");
+    const adminContent = document.getElementById("adminContent");
+    const loginError = document.getElementById("loginError");
+    const logoutBtn = document.getElementById("logoutBtn");
+    const photosGrid = document.getElementById("photosGrid");
+    const emptyNotice = document.getElementById("emptyNotice");
+
+    // Verificar se já está autenticado
+    if (localStorage.getItem("gala-admin-auth") === "true") {
+      showAdmin();
     }
 
-    function showLogin() { adminView.classList.add("hidden"); loginView.classList.remove("hidden"); }
-
-    async function load() {
-      const data = await api("photos");
-      photos = data.photos;
-      moderation.checked = data.moderation;
-      loginView.classList.add("hidden");
-      adminView.classList.remove("hidden");
-      render();
-    }
-
-    const ACTIONS = {
-      pending: [["approved", "Aprovar", ""], ["hidden", "Rejeitar", "ghost"]],
-      approved: [["hidden", "Ocultar", "ghost"]],
-      hidden: [["approved", "Publicar", ""]],
-    };
-
-    function render() {
-      ["pending", "approved", "hidden"].forEach((s) => (document.getElementById(`n-${s}`).textContent = photos.filter((p) => p.status === s).length));
-      document.querySelectorAll("#tabs button").forEach((b) => b.classList.toggle("active", b.dataset.tab === tab));
-      const list = photos.filter((p) => p.status === tab);
-      emptyAdmin.classList.toggle("hidden", list.length > 0);
-      grid.innerHTML = list.map((p) => `
-        <div class="card" data-id="${p.id}">
-          <a href="${p.url}" target="_blank" rel="noopener"><img src="${p.thumb}" alt="" loading="lazy" /></a>
-          <div class="meta"><strong>${p.uploader ? Gala.esc(p.uploader) : "Anónimo"}</strong> · ${Gala.timeAgo(p.createdAt)}</div>
-          <div class="actions">
-            ${ACTIONS[tab].map(([s, label, cls]) => `<button class="btn small ${cls}" data-status="${s}">${label}</button>`).join("")}
-            <button class="btn small danger" data-status="deleted">Eliminar</button>
-          </div>
-        </div>`).join("");
-    }
-
-    grid.addEventListener("click", async (e) => {
-      const btn = e.target.closest("button[data-status]");
-      if (!btn) return;
-      const id = Number(btn.closest(".card").dataset.id);
-      const status = btn.dataset.status;
-      if (status === "deleted" && !confirm("Eliminar definitivamente esta fotografia?")) return;
-      btn.disabled = true;
-      try {
-        await api("photo", { id, status });
-        photos = status === "deleted" ? photos.filter((p) => p.id !== id) : photos.map((p) => (p.id === id ? { ...p, status } : p));
-        render();
-      } catch (err) { btn.disabled = false; alert(err.message); }
-    });
-
-    document.getElementById("tabs").addEventListener("click", (e) => {
-      const b = e.target.closest("button[data-tab]");
-      if (b) { tab = b.dataset.tab; render(); }
-    });
-
-    moderation.addEventListener("change", async () => {
-      try { await api("settings", { moderation: moderation.checked }); }
-      catch (err) { moderation.checked = !moderation.checked; alert(err.message); }
-    });
-
-    document.getElementById("loginForm").addEventListener("submit", async (e) => {
+    function handleLogin(e) {
       e.preventDefault();
-      const err = document.getElementById("loginError");
-      err.classList.add("hidden");
+      const pwd = document.getElementById("password").value;
+      
+      if (pwd === ADMIN_PASSWORD) {
+        localStorage.setItem("gala-admin-auth", "true");
+        loginError.classList.add("hidden");
+        showAdmin();
+      } else {
+        loginError.classList.remove("hidden");
+      }
+    }
+
+    function logout() {
+      localStorage.removeItem("gala-admin-auth");
+      loginSection.classList.remove("hidden");
+      adminContent.classList.add("hidden");
+      logoutBtn.classList.add("hidden");
+      document.getElementById("password").value = "";
+    }
+
+    function showAdmin() {
+      loginSection.classList.add("hidden");
+      adminContent.classList.remove("hidden");
+      logoutBtn.classList.remove("hidden");
+      loadAdminPhotos();
+    }
+
+    async function loadAdminPhotos() {
       try {
-        await api("login", { user: document.getElementById("user").value.trim(), password: document.getElementById("password").value });
-        await load();
-      } catch (ex) { err.textContent = ex.message; err.classList.remove("hidden"); }
-    });
+        const photos = await Gala.fetchPhotos();
+        renderPhotos(photos);
+      } catch (err) {
+        renderPhotos([]);
+      }
+    }
 
-    document.getElementById("logout").onclick = async () => { await api("logout", {}); showLogin(); };
+    function renderPhotos(photos) {
+      photosGrid.innerHTML = "";
+      if (!photos || photos.length === 0) {
+        emptyNotice.classList.remove("hidden");
+        return;
+      }
 
-    load().catch(() => {});
-    setInterval(() => { if (!document.hidden && !adminView.classList.contains("hidden")) load().catch(() => {}); }, 20000);
+      emptyNotice.classList.add("hidden");
+      photos.forEach((photo) => {
+        const card = document.createElement("div");
+        card.className = "card-admin";
+        card.innerHTML = `
+          <img src="${photo.url || photo.thumb}" alt="Fotografia" />
+          <div class="card-body">
+            <div class="card-meta">
+              <strong>${Gala.esc(photo.uploader || "Anónimo")}</strong>
+              <span>${Gala.timeAgo(photo.createdAt)}</span>
+            </div>
+            <div class="card-actions">
+              <button class="btn-approve" onclick="approvePhoto('${photo.id}', this)">Aprovar</button>
+              <button class="btn-delete" onclick="deletePhoto('${photo.id}', this)">Remover</button>
+            </div>
+          </div>
+        `;
+        photosGrid.appendChild(card);
+      });
+    }
+
+    function approvePhoto(id, btn) {
+      const card = btn.closest(".card-admin");
+      card.style.opacity = "0.4";
+      btn.textContent = "Aprovada ✓";
+      btn.disabled = true;
+    }
+
+    function deletePhoto(id, btn) {
+      const card = btn.closest(".card-admin");
+      card.remove();
+      if (photosGrid.children.length === 0) {
+        emptyNotice.classList.remove("hidden");
+      }
+    }
   </script>
 </body>
 </html>
