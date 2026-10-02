@@ -32,7 +32,8 @@
     .title .t strong { display: block; font-family: var(--serif); font-size: 1.7rem; letter-spacing: 0; text-transform: none; color: var(--cream); font-weight: 500; }
     .credit { color: var(--cream); font-size: 1rem; margin-top: .4rem; opacity: .85; }
     .qr { display: flex; align-items: center; gap: 1rem; background: rgba(14,12,10,.8); border: 1px solid var(--line); border-radius: 16px; padding: .8rem 1.1rem .8rem .8rem; }
-    .qr img { width: 112px; height: 112px; border-radius: 8px; background: #fff; padding: 4px; }
+    .qr .qr-box { width: 112px; height: 112px; border-radius: 8px; background: #fff; padding: 4px; display: flex; align-items: center; justify-content: center; }
+    .qr .qr-box img, .qr .qr-box canvas { max-width: 100%; height: auto; }
     .qr p { margin: 0; font-size: .95rem; max-width: 12rem; line-height: 1.35; }
     .qr p strong { display: block; color: #60a5fa; font-family: var(--serif); font-size: 1.45rem; font-weight: 500; }
 
@@ -44,7 +45,8 @@
     body.ui .controls { opacity: 1; }
     .waiting { position: fixed; inset: 0; display: grid; place-items: center; text-align: center; padding: 2rem; }
     .waiting h1 { font-family: var(--serif); font-weight: 500; font-size: clamp(2.5rem, 6vw, 5rem); margin: 0 0 1rem; }
-    .waiting .big-qr { width: min(46vh, 340px); background: #fff; padding: 10px; border-radius: 14px; margin: 1.5rem auto 0; }
+    .waiting .big-qr { width: min(46vh, 340px); height: min(46vh, 340px); background: #fff; padding: 10px; border-radius: 14px; margin: 1.5rem auto 0; display: flex; align-items: center; justify-content: center; }
+    .waiting .big-qr img, .waiting .big-qr canvas { max-width: 100%; height: auto; }
   </style>
 </head>
 <body>
@@ -55,7 +57,7 @@
       <p class="eyebrow">Gala · 50 anos</p>
       <h1>As fotografias da noite<br /><span class="gold-text">aparecem aqui</span></h1>
       <p style="color:var(--muted)">Aponte a câmara do telemóvel ao código e partilhe as suas.</p>
-      <img class="big-qr" src="qr.svg" alt="QR-Code para enviar fotografias" />
+      <div class="big-qr" id="bigQr"></div>
     </div>
   </div>
 
@@ -68,7 +70,7 @@
       <div class="credit" id="credit"></div>
     </div>
     <div class="qr">
-      <img src="qr.svg" alt="QR-Code para enviar fotografias" />
+      <div class="qr-box" id="smallQr"></div>
       <p><strong>Partilhe as suas fotos</strong>Aponte a câmara e envie. Aparecem aqui em segundos.</p>
     </div>
   </div>
@@ -85,6 +87,21 @@
 
   <script src="common.js"></script>
   <script>
+    // Gerar QR Codes dinâmicos com o URL exato do envio de fotos
+    const uploadUrl = window.location.protocol + "//" + window.location.host + window.location.pathname.replace(/apresentacao\.html$/, "enviar.html");
+    
+    new QRCode(document.getElementById("bigQr"), {
+      text: uploadUrl,
+      width: 320,
+      height: 320
+    });
+
+    new QRCode(document.getElementById("smallQr"), {
+      text: uploadUrl,
+      width: 104,
+      height: 104
+    });
+
     const DURATION = 7000;
     const POLL = 8000;
     const params = new URLSearchParams(location.search);
