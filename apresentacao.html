@@ -9,6 +9,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css" />
+  <!-- Biblioteca para gerar QR Code dinamicamente -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <style>
     body { overflow: hidden; background: #000; cursor: none; }
@@ -27,10 +28,11 @@
     .overlay { position: fixed; left: 0; right: 0; bottom: 0; display: flex; justify-content: space-between; align-items: flex-end; gap: 2rem;
       padding: 2rem 2.5rem; background: linear-gradient(transparent, rgba(0,0,0,.75)); pointer-events: none; }
     .title { display: flex; align-items: center; gap: 1.1rem; }
-    .title .n { font-family: var(--serif); font-size: 4.2rem; line-height: .8; }
+    .title .n { font-family: var(--serif); font-size: 4.2rem; line-height: .8; color: #60a5fa; }
     .title .t { font-size: .85rem; letter-spacing: .2em; text-transform: uppercase; color: var(--muted); }
     .title .t strong { display: block; font-family: var(--serif); font-size: 1.7rem; letter-spacing: 0; text-transform: none; color: var(--cream); font-weight: 500; }
     .credit { color: var(--cream); font-size: 1rem; margin-top: .4rem; opacity: .85; }
+    
     .qr { display: flex; align-items: center; gap: 1rem; background: rgba(14,12,10,.8); border: 1px solid var(--line); border-radius: 16px; padding: .8rem 1.1rem .8rem .8rem; }
     .qr .qr-box { width: 112px; height: 112px; border-radius: 8px; background: #fff; padding: 4px; display: flex; align-items: center; justify-content: center; }
     .qr .qr-box img, .qr .qr-box canvas { max-width: 100%; height: auto; }
@@ -43,9 +45,11 @@
 
     .controls { position: fixed; top: 1rem; right: 1rem; display: flex; gap: .5rem; opacity: 0; transition: opacity .3s; }
     body.ui .controls { opacity: 1; }
+    
     .waiting { position: fixed; inset: 0; display: grid; place-items: center; text-align: center; padding: 2rem; }
     .waiting h1 { font-family: var(--serif); font-weight: 500; font-size: clamp(2.5rem, 6vw, 5rem); margin: 0 0 1rem; }
-    .waiting .big-qr { width: min(46vh, 340px); height: min(46vh, 340px); background: #fff; padding: 10px; border-radius: 14px; margin: 1.5rem auto 0; display: flex; align-items: center; justify-content: center; }
+    .waiting .blue-text { color: #60a5fa; }
+    .waiting .big-qr { width: min(46vh, 320px); height: min(46vh, 320px); background: #fff; padding: 10px; border-radius: 14px; margin: 1.5rem auto 0; display: flex; align-items: center; justify-content: center; }
     .waiting .big-qr img, .waiting .big-qr canvas { max-width: 100%; height: auto; }
   </style>
 </head>
@@ -55,7 +59,7 @@
   <div class="waiting hidden" id="waiting">
     <div>
       <p class="eyebrow">Gala · 50 anos</p>
-      <h1>As fotografias da noite<br /><span class="gold-text">aparecem aqui</span></h1>
+      <h1>As fotografias da noite<br /><span class="blue-text">aparecem aqui</span></h1>
       <p style="color:var(--muted)">Aponte a câmara do telemóvel ao código e partilhe as suas.</p>
       <div class="big-qr" id="bigQr"></div>
     </div>
@@ -64,7 +68,7 @@
   <div class="overlay" id="overlay">
     <div>
       <div class="title">
-        <span class="n gold-text">50</span>
+        <span class="n">50</span>
         <span class="t">Gala<strong>Escola Prof. Reynaldo dos Santos</strong></span>
       </div>
       <div class="credit" id="credit"></div>
@@ -87,13 +91,13 @@
 
   <script src="common.js"></script>
   <script>
-    // Gerar QR Codes dinâmicos com o URL exato do envio de fotos
+    // Gerar QR Codes dinâmicos apontando para a página enviar.html do site atual
     const uploadUrl = window.location.protocol + "//" + window.location.host + window.location.pathname.replace(/apresentacao\.html$/, "enviar.html");
     
     new QRCode(document.getElementById("bigQr"), {
       text: uploadUrl,
-      width: 320,
-      height: 320
+      width: 280,
+      height: 280
     });
 
     new QRCode(document.getElementById("smallQr"), {
@@ -113,7 +117,7 @@
     const credit = document.getElementById("credit");
     const badge = document.getElementById("badge");
 
-    let photos = [];       // todas as fotografias aprovadas (mais recentes primeiro)
+    let photos = [];       // todas as fotografias aprovadas
     let priority = [];     // novas fotografias a mostrar a seguir
     let index = -1;
     let currentId = null;
