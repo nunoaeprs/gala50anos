@@ -1,0 +1,82 @@
+functionsDirectory = "/opt/build/repo/netlify/functions"
+functionsDirectoryOrigin = "default"
+redirectsOrigin = "config"
+plugins = []
+headers = []
+
+[build]
+publish = "/opt/build/repo/public"
+publishOrigin = "config"
+functions = "/opt/build/repo/netlify/functions"
+
+  [build.environment]
+
+  [build.processing]
+
+    [build.processing.css]
+
+    [build.processing.html]
+
+    [build.processing.images]
+
+    [build.processing.js]
+
+  [build.services]
+
+[database]
+
+  [database.migrations]
+  path = "/opt/build/repo/netlify/database/migrations"
+
+[functions]
+
+  [functions."*"]
+  node_bundler = "esbuild"
+
+[[redirects]]
+from = "/enviar"
+to = "/enviar.html"
+status = 200
+force = false
+
+  [redirects.query]
+
+  [redirects.conditions]
+
+  [redirects.headers]
+
+[[redirects]]
+from = "/apresentacao"
+to = "/apresentacao.html"
+status = 200
+force = false
+
+  [redirects.query]
+
+  [redirects.conditions]
+
+  [redirects.headers]
+
+[[redirects]]
+from = "/admin"
+to = "/admin.html"
+status = 200
+force = false
+
+  [redirects.query]
+
+  [redirects.conditions]
+
+  [redirects.headers]
+
+[[redirects]]
+from = "/cartaz"
+to = "/cartaz.html"
+status = 200
+force = false
+
+  [redirects.query]
+
+  [redirects.conditions]
+
+  [redirects.headers]

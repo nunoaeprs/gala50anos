@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="pt-PT">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0e0c0a" />
+  <title>Enviar fotografias · Gala 50 Anos</title>
+  <meta name="description" content="As fotografias da Gala dos 50 anos da Escola Professor Reynaldo dos Santos, partilhadas por todos." />
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="/">
+      <span class="brand-mark gold-text">50</span>
+      <span class="brand-name"><strong>Gala 50 Anos</strong>Escola Prof. Reynaldo dos Santos</span>
+    </a>
+    <nav class="nav">
+      <a href="/">Galeria</a>
+      <a href="/enviar" aria-current="page">Enviar fotos</a>
+      <a href="/apresentacao">Apresentação</a>
+    </nav>
+  </header>
+
+  <main class="page">
+    <p class="eyebrow">Partilhe a noite</p>
+    <h1>Envie as suas <span class="gold-text">fotografias</span></h1>
+    <p class="lead">Escolha quantas quiser. Aparecem na galeria e na apresentação da gala poucos segundos depois.</p>
+
+    <div class="panel">
+      <div class="field">
+        <label for="uploader">O seu nome (opcional)</label>
+        <input class="input" id="uploader" maxlength="60" placeholder="Ex.: Maria Silva, turma de 1998" autocomplete="name" />
+      </div>
+
+      <label class="dropzone" id="dropzone" for="files">
+        <span class="icon">＋</span>
+        <strong>Escolher fotografias</strong>
+        <span>Toque para abrir a galeria ou a câmara do telemóvel</span>
+      </label>
+      <input type="file" id="files" accept="image/*" multiple class="hidden" />
+
+      <div class="queue" id="queue"></div>
+      <div class="summary hidden" id="summary">
+        <span id="summaryText"></span>
+        <a class="btn ghost small" href="/">Ver galeria →</a>
+      </div>
+      <div class="notice hidden" id="notice"></div>
+    </div>
+  </main>
+
+  <footer class="footer">Gala dos 50 Anos · Escola Professor Reynaldo dos Santos</footer>
+
+  <script src="/common.js"></script>
+  <script>
+    const MAX_EDGE = 2048;
+    const THUMB_EDGE = 640;
+    const CONCURRENCY = 2;
+
+    const nameInput = document.getElementById("uploader");
+    const input = document.getElementById("files");
+    const dropzone = document.getElementById("dropzone");
+    const queueEl = document.getElementById("queue");
+    const summary = document.getElementById("summary");
+    const summaryText = document.getElementById("summaryText");
+    const notice = document.getElementById("notice");
+
+    nameInput.value = localStorage.getItem("gala-uploader") || "";
+    nameInput.addEventListener("input", () => localStorage.setItem("gala-uploader", nameInput.value.trim()));
+
+    const jobs = [];
+    let active = 0;
+    let done = 0, failed = 0, pendingReview = 0;
+
+    function loadImage(file) {
+      return new Promise((resolve, reject) => {
+        const url = URL.createObjectURL(file);
+        const img = new Image();
+        img.onload = () => resolve({ img, url });
+        img.onerror = () => { URL.revokeObjectURL(url); reject(new Error("Formato não suportado")); };
+        img.src = url;
+      });
+    }
+
+    function toJpeg(img, edge, quality) {
+      const scale = Math.min(1, edge / Math.max(img.naturalWidth, img.naturalHeight));
+      const w = Math.round(img.naturalWidth * scale);
+      const h = Math.round(img.naturalHeight * scale);
+      const canvas = document.createElement("canvas");
+      canvas.width = w; canvas.height = h;
+      canvas.getContext("2d").drawImage(img, 0, 0, w, h);
+      return new Promise((resolve) => canvas.toBlob((b) => resolve({ blob: b, w, h }), "image/jpeg", quality));
+    }
+
+    function send(form, onProgress) {
+      return new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open("POST", "/api/photos");
+        xhr.upload.onprogress = (e) => e.lengthComputable && onProgress(e.loaded / e.total);
+        xhr.onload = () => {
+          let body = {};
+          try { body = JSON.parse(xhr.responseText); } catch {}
+          xhr.status < 300 ? resolve(body) : reject(new Error(body.error || "Falhou o envio"));
+        };
+        xhr.onerror = () => reject(new Error("Sem ligação"));
+        xhr.send(form);
+      });
+    }
+
+    async function process(job) {
+      const { el, file } = job;
+      const state = el.querySelector(".q-state");
+      const bar = el.querySelector(".bar");
+      try {
+        state.textContent = "A preparar…";
+        const { img, url } = await loadImage(file);
+        el.querySelector("img").src = url;
+        const full = await toJpeg(img, MAX_EDGE, 0.86);
+        const thumb = await toJpeg(img, THUMB_EDGE, 0.8);
+        const form = new FormData();
+        form.append("file", full.blob, "foto.jpg");
+        form.append("thumb", thumb.blob, "thumb.jpg");
+        form.append("width", full.w);
+        form.append("height", full.h);
+        form.append("uploader", nameInput.value.trim());
+        state.textContent = "A enviar…";
+        const res = await send(form, (p) => (bar.style.width = `${Math.round(p * 100)}%`));
+        el.classList.add("done");
+        state.textContent = "";
+        bar.remove();
+        done++;
+        if (res.photo?.status === "pending") pendingReview++;
+      } catch (e) {
+        el.classList.add("error");
+        state.textContent = e.message;
+        failed++;
+      }
+      updateSummary();
+    }
+
+    function updateSummary() {
+      summary.classList.remove("hidden");
+      const total = jobs.length;
+      const left = total - done - failed;
+      summaryText.textContent = left
+        ? `A enviar ${done + failed + 1} de ${total}…`
+        : `${done} ${done === 1 ? "fotografia enviada" : "fotografias enviadas"}${failed ? ` · ${failed} com erro` : ""}. Obrigado!`;
+      if (!left && pendingReview) {
+        notice.className = "notice ok";
+        notice.textContent = "As fotografias ficam visíveis assim que forem validadas pela organização.";
+      }
+    }
+
+    function pump() {
+      while (active < CONCURRENCY) {
+        const job = jobs.find((j) => !j.started);
+        if (!job) return;
+        job.started = true;
+        active++;
+        process(job).finally(() => { active--; pump(); });
+      }
+    }
+
+    function addFiles(files) {
+      notice.className = "notice hidden";
+      [...files].filter((f) => f.type.startsWith("image/") || /\.(heic|heif)$/i.test(f.name)).forEach((file) => {
+        const el = document.createElement("div");
+        el.className = "q-item";
+        el.innerHTML = `<img alt="" /><div class="q-state">Em espera</div><div class="bar" style="width:0"></div>`;
+        queueEl.append(el);
+        jobs.push({ file, el, started: false });
+      });
+      updateSummary();
+      pump();
+    }
+
+    input.addEventListener("change", () => { addFiles(input.files); input.value = ""; });
+    ["dragenter", "dragover"].forEach((t) => dropzone.addEventListener(t, (e) => { e.preventDefault(); dropzone.classList.add("drag"); }));
+    ["dragleave", "drop"].forEach((t) => dropzone.addEventListener(t, (e) => { e.preventDefault(); dropzone.classList.remove("drag"); }));
+    dropzone.addEventListener("drop", (e) => addFiles(e.dataTransfer.files));
+    window.addEventListener("beforeunload", (e) => { if (jobs.some((j) => j.started && !j.el.classList.contains("done") && !j.el.classList.contains("error"))) e.preventDefault(); });
+  </script>
+</body>
+</html>

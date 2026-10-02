@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="pt-PT">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0e0c0a" />
+  <title>Gala 50 Anos · Escola Professor Reynaldo dos Santos</title>
+  <meta name="description" content="As fotografias da Gala dos 50 anos da Escola Professor Reynaldo dos Santos, partilhadas por todos." />
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="/">
+      <span class="brand-mark gold-text">50</span>
+      <span class="brand-name"><strong>Gala 50 Anos</strong>Escola Prof. Reynaldo dos Santos</span>
+    </a>
+    <nav class="nav">
+      <a href="/" aria-current="page">Galeria</a>
+      <a href="/enviar">Enviar fotos</a>
+      <a href="/apresentacao">Apresentação</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="hero-50 gold-text" aria-hidden="true">50</div>
+      <div>
+        <p class="eyebrow">Gala · Meio século de história</p>
+        <h1>Escola Professor <em>Reynaldo dos Santos</em></h1>
+        <p class="lead">Cinquenta anos de alunos, professores e funcionários. Esta noite, cada fotografia conta a nossa história. Partilhe as suas e veja-as aparecer aqui, ao vivo.</p>
+        <div class="hero-actions">
+          <a class="btn" href="/enviar">＋ Enviar as minhas fotografias</a>
+          <a class="btn ghost" href="/apresentacao">▶ Ver apresentação</a>
+        </div>
+      </div>
+    </section>
+
+    <div class="strip">
+      <h2>A galeria da noite</h2>
+      <span class="live" id="count">A carregar…</span>
+    </div>
+
+    <div class="gallery" id="gallery"></div>
+    <div class="empty hidden" id="empty">
+      <h3>Seja o primeiro a partilhar</h3>
+      <p>Ainda não há fotografias. Aponte a câmara do telemóvel ao QR-Code da gala ou envie já as suas.</p>
+      <a class="btn" href="/enviar">Enviar fotografias</a>
+    </div>
+  </main>
+
+  <div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Fotografia">
+    <div class="lb-bar"><span id="lbCaption"></span><button class="lb-btn" id="lbClose" aria-label="Fechar">✕</button></div>
+    <button class="lb-btn lb-prev" id="lbPrev" aria-label="Anterior">‹</button>
+    <img id="lbImg" alt="" />
+    <button class="lb-btn lb-next" id="lbNext" aria-label="Seguinte">›</button>
+  </div>
+
+  <footer class="footer">Gala dos 50 Anos · Escola Professor Reynaldo dos Santos · <a href="/cartaz">QR-Code para imprimir</a></footer>
+
+  <script src="/common.js"></script>
+  <script>
+    const gallery = document.getElementById("gallery");
+    const empty = document.getElementById("empty");
+    const count = document.getElementById("count");
+    let photos = [];
+    let current = -1;
+
+    function tile(p, isNew) {
+      const btn = document.createElement("button");
+      btn.className = "tile" + (isNew ? " is-new" : "");
+      btn.dataset.id = p.id;
+      const ratio = p.width && p.height ? `aspect-ratio:${p.width}/${p.height}` : "";
+      btn.innerHTML = `<img src="${p.thumb}" alt="Fotografia${p.uploader ? " de " + Gala.esc(p.uploader) : ""}" loading="lazy" style="${ratio}" />
+        <span class="by">${p.uploader ? Gala.esc(p.uploader) + " · " : ""}${Gala.timeAgo(p.createdAt)}</span>`;
+      btn.addEventListener("click", () => openAt(photos.findIndex((x) => x.id === p.id)));
+      return btn;
+    }
+
+    function updateCount() {
+      count.textContent = `${photos.length} ${photos.length === 1 ? "fotografia" : "fotografias"} · atualiza ao vivo`;
+      empty.classList.toggle("hidden", photos.length > 0);
+    }
+
+    async function load() {
+      try {
+        photos = await Gala.fetchPhotos();
+        gallery.replaceChildren(...photos.map((p) => tile(p, false)));
+        updateCount();
+      } catch (e) {
+        count.textContent = e.message;
+      }
+    }
+
+    async function refresh() {
+      try {
+        const latest = await Gala.fetchPhotos();
+        const known = new Set(photos.map((p) => p.id));
+        const fresh = latest.filter((p) => !known.has(p.id));
+        const keep = new Set(latest.map((p) => p.id));
+        // remove fotografias ocultadas entretanto pelo admin
+        gallery.querySelectorAll(".tile").forEach((el) => { if (!keep.has(Number(el.dataset.id))) el.remove(); });
+        fresh.slice().reverse().forEach((p) => gallery.prepend(tile(p, true)));
+        photos = latest;
+        updateCount();
+      } catch {}
+    }
+
+    // Lightbox
+    const lb = document.getElementById("lightbox");
+    const lbImg = document.getElementById("lbImg");
+    const lbCaption = document.getElementById("lbCaption");
+    function openAt(i) {
+      if (i < 0 || !photos.length) return;
+      current = (i + photos.length) % photos.length;
+      const p = photos[current];
+      lbImg.src = p.url;
+      lbCaption.textContent = `${current + 1} / ${photos.length}${p.uploader ? " · " + p.uploader : ""}`;
+      lb.classList.add("open");
+    }
+    function close() { lb.classList.remove("open"); lbImg.removeAttribute("src"); }
+    document.getElementById("lbClose").onclick = close;
+    document.getElementById("lbPrev").onclick = () => openAt(current - 1);
+    document.getElementById("lbNext").onclick = () => openAt(current + 1);
+    lb.addEventListener("click", (e) => { if (e.target === lb) close(); });
+    document.addEventListener("keydown", (e) => {
+      if (!lb.classList.contains("open")) return;
+      if (e.key === "Escape") close();
+      if (e.key === "ArrowLeft") openAt(current - 1);
+      if (e.key === "ArrowRight") openAt(current + 1);
+    });
+
+    load();
+    setInterval(() => { if (!document.hidden) refresh(); }, 15000);
+  </script>
+</body>
+</html>
