@@ -24,7 +24,7 @@
     .btn-approve:hover { background: #1d4ed8; }
     .btn-delete { background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3) !important; }
     .btn-delete:hover { background: rgba(239, 68, 68, 0.3); }
-    .login-box { max-width: 380px; margin: 4rem auto; padding: 2rem; background: var(--ink-2); border: 1px solid var(--line); border-radius: 16px; text-align: center; }
+    .login-box { max-width: 380px; margin: 4rem auto; padding: 2rem; background: var(--ink-2, #18181b); border: 1px solid var(--line, #27272a); border-radius: 16px; text-align: center; }
   </style>
 </head>
 <body>
@@ -34,7 +34,9 @@
       <span class="brand-name"><strong>Gala 50 Anos</strong>Painel de Moderação</span>
     </a>
     <nav class="nav">
-      <a href="index.html">Ver Galeria</a>
+      <a href="index.html">Galeria</a>
+      <a href="enviar.html">Enviar fotos</a>
+      <a href="apresentacao.html">Apresentação</a>
       <button id="logoutBtn" class="btn ghost small hidden" onclick="logout()">Sair</button>
     </nav>
   </header>
@@ -42,14 +44,14 @@
   <main class="page">
     <!-- Formulário de Login -->
     <div id="loginSection" class="login-box">
-      <h2 style="font-family:var(--serif); font-size: 2rem; margin-bottom: .5rem;">Acesso Restrito</h2>
-      <p style="color:var(--muted); font-size: .9rem; margin-bottom: 1.5rem;">Introduza a palavra-passe de moderação.</p>
+      <h2 style="font-family:var(--serif); font-size: 2rem; margin-bottom: .5rem; color: #fff;">Acesso Restrito</h2>
+      <p style="color:var(--muted, #a1a1aa); font-size: .9rem; margin-bottom: 1.5rem;">Introduza a palavra-passe de moderação.</p>
       
       <form onsubmit="handleLogin(event)">
         <div class="field" style="margin-bottom: 1rem;">
-          <input type="password" id="password" class="input" placeholder="Palavra-passe" required style="text-align: center;" />
+          <input type="password" id="password" class="input" placeholder="Palavra-passe" required style="text-align: center; width: 100%; padding: 0.75rem; border-radius: 8px; border: 1px solid var(--line, #27272a); background: #000; color: #fff;" />
         </div>
-        <button type="submit" class="btn" style="width: 100%; background: #2563eb; color: #fff;">Entrar</button>
+        <button type="submit" class="btn" style="width: 100%; background: #2563eb; color: #fff; padding: 0.75rem; border-radius: 8px; border: none; font-weight: 600; cursor: pointer;">Entrar</button>
       </form>
       <p id="loginError" style="color: #f87171; font-size: .85rem; margin-top: 1rem;" class="hidden">Palavra-passe incorreta.</p>
     </div>
@@ -64,7 +66,7 @@
         <span class="status-badge">● Modo de Demonstração</span>
       </div>
 
-      <div id="emptyNotice" class="notice hidden" style="text-align: center; padding: 3rem;">
+      <div id="emptyNotice" class="notice" style="text-align: center; padding: 3rem; color: var(--muted, #a1a1aa);">
         Não existem fotografias pendentes de moderação.
       </div>
 
@@ -76,20 +78,21 @@
 
   <script src="common.js"></script>
   <script>
-    // Palavra-passe de demonstração para o GitHub Pages
     const ADMIN_PASSWORD = "gala50";
 
     const loginSection = document.getElementById("loginSection");
     const adminContent = document.getElementById("adminContent");
     const loginError = document.getElementById("loginError");
     const logoutBtn = document.getElementById("logoutBtn");
-    const photosGrid = document.getElementById("photosGrid");
-    const emptyNotice = document.getElementById("emptyNotice");
 
-    // Verificar se já está autenticado
-    if (localStorage.getItem("gala-admin-auth") === "true") {
-      showAdmin();
-    }
+    // Garantir exibição do login ao carregar
+    document.addEventListener("DOMContentLoaded", () => {
+      if (localStorage.getItem("gala-admin-auth") === "true") {
+        showAdmin();
+      } else {
+        loginSection.classList.remove("hidden");
+      }
+    });
 
     function handleLogin(e) {
       e.preventDefault();
@@ -116,59 +119,6 @@
       loginSection.classList.add("hidden");
       adminContent.classList.remove("hidden");
       logoutBtn.classList.remove("hidden");
-      loadAdminPhotos();
-    }
-
-    async function loadAdminPhotos() {
-      try {
-        const photos = await Gala.fetchPhotos();
-        renderPhotos(photos);
-      } catch (err) {
-        renderPhotos([]);
-      }
-    }
-
-    function renderPhotos(photos) {
-      photosGrid.innerHTML = "";
-      if (!photos || photos.length === 0) {
-        emptyNotice.classList.remove("hidden");
-        return;
-      }
-
-      emptyNotice.classList.add("hidden");
-      photos.forEach((photo) => {
-        const card = document.createElement("div");
-        card.className = "card-admin";
-        card.innerHTML = `
-          <img src="${photo.url || photo.thumb}" alt="Fotografia" />
-          <div class="card-body">
-            <div class="card-meta">
-              <strong>${Gala.esc(photo.uploader || "Anónimo")}</strong>
-              <span>${Gala.timeAgo(photo.createdAt)}</span>
-            </div>
-            <div class="card-actions">
-              <button class="btn-approve" onclick="approvePhoto('${photo.id}', this)">Aprovar</button>
-              <button class="btn-delete" onclick="deletePhoto('${photo.id}', this)">Remover</button>
-            </div>
-          </div>
-        `;
-        photosGrid.appendChild(card);
-      });
-    }
-
-    function approvePhoto(id, btn) {
-      const card = btn.closest(".card-admin");
-      card.style.opacity = "0.4";
-      btn.textContent = "Aprovada ✓";
-      btn.disabled = true;
-    }
-
-    function deletePhoto(id, btn) {
-      const card = btn.closest(".card-admin");
-      card.remove();
-      if (photosGrid.children.length === 0) {
-        emptyNotice.classList.remove("hidden");
-      }
     }
   </script>
 </body>
