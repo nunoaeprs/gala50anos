@@ -6,22 +6,22 @@
   <meta name="theme-color" content="#0e0c0a" />
   <title>Enviar fotografias · Gala 50 Anos</title>
   <meta name="description" content="As fotografias da Gala dos 50 anos da Escola Professor Reynaldo dos Santos, partilhadas por todos." />
-  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="/styles.css" />
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
   <header class="site-header">
-    <a class="brand" href="/">
+    <a class="brand" href="index.html">
       <span class="brand-mark gold-text">50</span>
       <span class="brand-name"><strong>Gala 50 Anos</strong>Escola Prof. Reynaldo dos Santos</span>
     </a>
     <nav class="nav">
-      <a href="/">Galeria</a>
-      <a href="/enviar" aria-current="page">Enviar fotos</a>
-      <a href="/apresentacao">Apresentação</a>
+      <a href="index.html">Galeria</a>
+      <a href="enviar.html" aria-current="page">Enviar fotos</a>
+      <a href="apresentacao.html">Apresentação</a>
     </nav>
   </header>
 
@@ -46,7 +46,7 @@
       <div class="queue" id="queue"></div>
       <div class="summary hidden" id="summary">
         <span id="summaryText"></span>
-        <a class="btn ghost small" href="/">Ver galeria →</a>
+        <a class="btn ghost small" href="index.html">Ver galeria →</a>
       </div>
       <div class="notice hidden" id="notice"></div>
     </div>
@@ -54,7 +54,7 @@
 
   <footer class="footer">Gala dos 50 Anos · Escola Professor Reynaldo dos Santos</footer>
 
-  <script src="/common.js"></script>
+  <script src="common.js"></script>
   <script>
     const MAX_EDGE = 2048;
     const THUMB_EDGE = 640;
@@ -98,7 +98,7 @@
     function send(form, onProgress) {
       return new Promise((resolve, reject) => {
         const xhr = new XMLHttpRequest();
-        xhr.open("POST", "/api/photos");
+        xhr.open("POST", "api/photos");
         xhr.upload.onprogress = (e) => e.lengthComputable && onProgress(e.loaded / e.total);
         xhr.onload = () => {
           let body = {};
