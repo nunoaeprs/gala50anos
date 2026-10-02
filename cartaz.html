@@ -9,22 +9,33 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css" />
+  <!-- Biblioteca para gerar QR Code dinamicamente -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <style>
     .poster { max-width: 560px; margin: 2rem auto; text-align: center; padding: 3rem 2rem; border: 1px solid #3b82f6; border-radius: 22px; background: var(--ink-2); position: relative; }
     .poster::before { content: ""; position: absolute; inset: 10px; border: 1px solid var(--line); border-radius: 16px; pointer-events: none; }
-    .poster .n { font-family: var(--serif); font-size: 7rem; line-height: .85; margin: 0; }
+    .poster .n { font-family: var(--serif); font-size: 7rem; line-height: .85; margin: 0; color: #60a5fa; }
     .poster h1 { font-family: var(--serif); font-weight: 500; font-size: 2.3rem; line-height: 1.1; margin: .6rem 0 1.5rem; }
-    .poster .code-container { width: 300px; height: 300px; max-width: 100%; margin: 0 auto; background: #fff; padding: 14px; border-radius: 14px; display: flex; align-items: center; justify-content: center; }
-    .poster .code-container img, .poster .code-container canvas { max-width: 100%; height: auto; margin: 0 auto; }
+    
+    /* Contentor do QR Code */
+    .poster .code-box { width: 280px; height: 280px; max-width: 100%; margin: 0 auto; background: #fff; padding: 14px; border-radius: 14px; display: flex; align-items: center; justify-content: center; }
+    .poster .code-box img, .poster .code-box canvas { max-width: 100%; height: auto; margin: 0 auto; }
+    
     .poster p { color: var(--muted); margin: 1.5rem 0 .3rem; }
-    .poster .url { color: #60a5fa; font-weight: 600; word-break: break-all; }
-    .print { text-align: center; margin-bottom: 3rem; }
+    .poster .url { color: #60a5fa; font-weight: 600; word-break: break-all; font-size: 1.1rem; }
+    
+    .print-actions { text-align: center; margin-bottom: 3rem; display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+    .btn-blue { background: #2563eb; color: #ffffff; border: none; padding: .75rem 1.5rem; border-radius: 999px; font-weight: 600; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; transition: background .2s; }
+    .btn-blue:hover { background: #1d4ed8; }
+    .btn-outline { background: transparent; color: var(--cream); border: 1px solid var(--line); padding: .75rem 1.5rem; border-radius: 999px; font-weight: 600; text-decoration: none; cursor: pointer; }
+    .btn-outline:hover { border-color: #60a5fa; color: #60a5fa; }
+
     @media print {
       body { background: #fff; color: #111; }
-      body::before, .print { display: none; }
+      body::before, .print-actions { display: none; }
       .poster { border-color: #2563eb; background: #fff; margin: 0 auto; }
       .poster p { color: #444; }
+      .poster .n { color: #1d4ed8; }
       .poster .url { color: #1d4ed8; }
     }
   </style>
@@ -32,27 +43,30 @@
 <body>
   <div class="poster">
     <p class="eyebrow">Gala · Meio século</p>
-    <p class="n gold-text">50</p>
+    <p class="n">50</p>
     <h1>Escola Professor<br />Reynaldo dos Santos</h1>
-    <div class="code-container" id="qrcode"></div>
+    
+    <div class="code-box" id="qrcode"></div>
+    
     <p><strong style="color:inherit">Partilhe as fotografias da noite.</strong><br />Aponte a câmara do telemóvel ao código.</p>
     <div class="url" id="url"></div>
   </div>
-  <div class="print">
-    <button class="btn" onclick="print()">Imprimir cartaz</button> 
-    <a class="btn ghost" href="index.html">← Voltar à galeria</a>
+
+  <div class="print-actions">
+    <button class="btn-blue" onclick="print()">Imprimir cartaz</button> 
+    <a class="btn-outline" href="index.html">← Voltar à galeria</a>
   </div>
 
   <script>
-    // Constrói o URL exato da página de envio no site atual
+    // URL dinâmico da página de envio
     const uploadUrl = window.location.protocol + "//" + window.location.host + window.location.pathname.replace(/cartaz\.html$/, "enviar.html");
     document.getElementById("url").textContent = uploadUrl;
 
-    // Gera o QR Code dinamicamente
+    // Gerar QR Code automatico apontando para o URL correto
     new QRCode(document.getElementById("qrcode"), {
       text: uploadUrl,
-      width: 270,
-      height: 270,
+      width: 250,
+      height: 250,
       colorDark : "#000000",
       colorLight : "#ffffff",
       correctLevel : QRCode.CorrectLevel.H
