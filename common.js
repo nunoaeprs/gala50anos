@@ -1,13 +1,20 @@
 // Utilitários partilhados pelas páginas da galeria.
 window.Gala = {
   async fetchPhotos(since = 0) {
-    const res = await fetch(`/api/photos${since ? `?since=${since}` : ""}`, { cache: "no-store" });
-    if (!res.ok) throw new Error("Não foi possível carregar as fotografias.");
-    return (await res.json()).photos;
+    try {
+      const url = `api/photos${since ? `?since=${since}` : ""}`;
+      const res = await fetch(url, { cache: "no-store" });
+      if (!res.ok) throw new Error("Não foi possível carregar as fotografias.");
+      const data = await res.json();
+      return data.photos || [];
+    } catch (err) {
+      console.warn("Sem resposta da API (modo estático/GitHub Pages).", err);
+      return [];
+    }
   },
 
-
   timeAgo(date) {
+    if (!date) return "";
     const s = Math.max(1, Math.round((Date.now() - new Date(date).getTime()) / 1000));
     if (s < 60) return "agora mesmo";
     const m = Math.round(s / 60);
@@ -18,6 +25,12 @@ window.Gala = {
   },
 
   esc(str) {
-    return String(str ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
+    return String(str ?? "").replace(/[&<>"']/g, (c) => ({
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      '"': "&quot;",
+      "'": "&#39;"
+    })[c]);
   },
 };
