@@ -7,7 +7,7 @@
   <title>Administração · Gala 50 Anos</title>
   <meta name="robots" content="noindex" />
   <meta name="description" content="As fotografias da Gala dos 50 anos da Escola Professor Reynaldo dos Santos, partilhadas por todos." />
-  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet" />
@@ -15,14 +15,14 @@
 </head>
 <body>
   <header class="site-header">
-    <a class="brand" href="/">
+    <a class="brand" href="index.html">
       <span class="brand-mark gold-text">50</span>
       <span class="brand-name"><strong>Gala 50 Anos</strong>Escola Prof. Reynaldo dos Santos</span>
     </a>
     <nav class="nav">
-      <a href="/">Galeria</a>
-      <a href="/enviar">Enviar fotos</a>
-      <a href="/apresentacao">Apresentação</a>
+      <a href="index.html">Galeria</a>
+      <a href="enviar.html">Enviar fotos</a>
+      <a href="apresentacao.html">Apresentação</a>
     </nav>
   </header>
 
@@ -34,9 +34,9 @@
     .tabs { display: flex; gap: .3rem; background: var(--ink-2); border: 1px solid var(--line); border-radius: 999px; padding: .3rem; }
     .tabs button { border: 0; background: transparent; color: var(--muted); padding: .45rem 1rem; border-radius: 999px; cursor: pointer; }
     .tabs button.active { background: var(--ink-3); color: var(--cream); }
-    .tabs .n { display: inline-block; min-width: 1.4rem; margin-left: .3rem; font-size: .75rem; padding: .05rem .4rem; border-radius: 999px; background: rgba(214,178,106,.15); color: var(--gold-2); }
+    .tabs .n { display: inline-block; min-width: 1.4rem; margin-left: .3rem; font-size: .75rem; padding: .05rem .4rem; border-radius: 999px; background: rgba(59, 130, 246, 0.18); color: #60a5fa; }
     .switch { display: flex; align-items: center; gap: .7rem; background: var(--ink-2); border: 1px solid var(--line); border-radius: var(--radius); padding: .9rem 1.1rem; margin-bottom: 1.5rem; }
-    .switch input { width: 2.6rem; height: 1.5rem; accent-color: var(--gold); }
+    .switch input { width: 2.6rem; height: 1.5rem; accent-color: #2563eb; }
     .switch p { margin: 0; font-size: .9rem; color: var(--muted); }
     .switch p strong { color: var(--cream); display: block; }
     .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 14px; }
@@ -84,7 +84,7 @@
     </section>
   </main>
 
-  <script src="/common.js"></script>
+  <script src="common.js"></script>
   <script>
     const loginView = document.getElementById("loginView");
     const adminView = document.getElementById("adminView");
